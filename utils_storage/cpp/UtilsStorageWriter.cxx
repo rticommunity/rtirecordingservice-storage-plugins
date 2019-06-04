@@ -144,7 +144,7 @@ const dds::core::xtypes::DynamicType& dynamic_type(
         const rti::routing::StreamInfo& stream_info)
 {
     assert(stream_info.type_info().type_representation_kind()
-            rti::routing::TypeRepresentationKind::DYNAMIC_TYPE);
+            == rti::routing::TypeRepresentationKind::DYNAMIC_TYPE);
     return *(static_cast<dds::core::xtypes::DynamicType*>(
             stream_info.type_info().type_representation()));
 }

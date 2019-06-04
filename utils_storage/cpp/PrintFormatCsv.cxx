@@ -586,6 +586,14 @@ void PrintFormatCsv::build_column_info(
     {
         const StructType& struct_type =
                 static_cast<const StructType&> (member_type);
+
+        // Type can be extended, so a parent will exist
+        if (struct_type.has_parent()) {
+            build_column_info(
+                    current_info,
+                    struct_type.parent());
+        }
+        
         // Recurse members
         for (auto struct_member : struct_type.members()) {
             // complex member: branch tree
