@@ -1,4 +1,5 @@
-Recording Service Storage plug-in: CSV Converter
+************************************************
+Recording Service Storage plug-in: Utils Storage
 ************************************************
 
 .. |RecS| replace:: *RecordingService*
@@ -14,10 +15,14 @@ Introduction
 ============
 
 This module contains the implementation of a |RecS| |SP| that writes data into
-a text file in *comma-separated value* (|CSV|) format. The expected usage of
-this plug-in is with the |RecS| *Converter* tool, to convert an existing
-database from a previous recording into a set of text file(s) containing the
-data in |CSV| format.
+text files in a configurable format. The current implementation provides
+support for the following format:
+
+* *comma-separated value* (|CSV|) format.
+
+The expected usage of this plug-in is with the |RecS| *Converter* tool, to
+convert an existing database from a previous recording into a set of text
+file(s) containing the data in the specified format format.
 
 Requirements
 ------------
@@ -31,6 +36,8 @@ To use this plug-in you will need:
 Capabilities and Usage
 ======================
 
+CSV Format
+----------
 This plug-in stores the data provided to the *Output* |SP| in |CSV| format. By
 default, the plug-in generates a separate |CSV| file for each *Topic*. The
 content and format of each file is a follows:
@@ -63,10 +70,10 @@ All the files are placed in a directory that can be specified in the
 plug-in configuration.
 
 Mapping of a data sample into columns
--------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 General case
-^^^^^^^^^^^^
+""""""""""""
 
 As shown in the table above, a data sample is represented in a single row
 comprising  multiple columns. Each cell holds only a value for a *final* or
@@ -89,7 +96,7 @@ If either ``<parent_member>`` or ``<final_member>`` is a *Collection* type
 for each possible element in the *Collection* is created.
 
 Example
-'''''''
++++++++
 
 Consider the following type described in IDL:
 
@@ -130,13 +137,13 @@ The resulting type header row will look as follows:
 
 
 Unions
-^^^^^^
+""""""
 
 The mapping of an ``Union`` type is similar to an ``Struct`` type except that
 a discriminator column with name ``disc`` is placed before all the members.
 
 Example
-'''''''
++++++++
 
 Consider the following type described in IDL:
 
@@ -169,7 +176,7 @@ The resulting type header row will look as follows:
 
 
 Data Values
-^^^^^^^^^^^
+"""""""""""
 For a given data sample, the value for each member is placed under the
 corresponding column represented as a ``String``, which applies to all primitive
 types. By default, enumerations are printed with their corresponding text label.
@@ -184,7 +191,7 @@ the following situations:
 By default, the value of an empty member is represented as ``nil``.
 
 Example
-'''''''
++++++++
 
 Consider the following type described in IDL:
 
@@ -226,7 +233,7 @@ The resulting type header row and two data values row will look as follows:
 
 
 Plug-in Configuration
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 The plug-in can be configured through the use of the the properties shown in
 table below:
@@ -255,21 +262,21 @@ table below:
         name is equal to ``[OUTPUT_FILE_BASE_NAME]``. |br|
         Default: **csv_converted**
     * - **<base_name>.merge_output_files**
-      - <boolean>
+      - ``<boolean>``
       - Specifies whether the generated files shall be consolidated into
         a single file. |br|
         Default: **true**
     * - **<base_name>.verbosity**
-      - <integer> [0 - 5]
+      - ``<integer> [0 - 5]``
       - Sets the verbosity level of the plug-in. See ``rti::config::Verbosity``
         for the different levels available.
         Default: **1** (Exceptions)
     * - **<base_name>.csv.empty_member_value**
-      - <string>
+      - ``<string>``
       - Sets the value used for data members that are not present or empty.
         Default: **nil**
     * - **<base_name>.csv.enum_as_string**
-      - <boolean>
+      - ``<boolean>``
       - Indicates whether values for enumeration members are printed as their
         corresponding label string or as an integer. |br|
         Default: **true**
