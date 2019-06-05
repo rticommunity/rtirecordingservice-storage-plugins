@@ -12,6 +12,8 @@
 
 #include "Logger.hpp"
 
+namespace rti { namespace recorder { namespace utils {
+
 std::ostream& operator<< (
         std::ostream& out,
         const rti::config::Verbosity& verbosity)
@@ -56,7 +58,7 @@ Logger& Logger::instance()
     return instance;
 }
 
-void Logger::verbosity(rti::config::Verbosity& verbosity)
+void Logger::verbosity(rti::config::Verbosity verbosity)
 {
     instance()._verbosity = verbosity;
 }
@@ -67,3 +69,4 @@ rti::config::Verbosity Logger::verbosity() const
 }
 
 
+} } }

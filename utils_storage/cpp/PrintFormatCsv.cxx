@@ -307,17 +307,8 @@ public:
  * --- PrintFormatCsvProperty -------------------------------------------------
  */
 
-PrintFormatCsvProperty::PrintFormatCsvProperty() : 
-    empty_member_value_rep_(""),
+PrintFormatCsvProperty::PrintFormatCsvProperty() :
     enum_as_string_(false)
-{
-
-}
-
-PrintFormatCsvProperty::PrintFormatCsvProperty(
-        const PrintFormatCsvProperty& other) :
-        empty_member_value_rep_(other.empty_member_value_rep_),
-        enum_as_string_(other.enum_as_string_)
 {
 
 }
@@ -352,33 +343,33 @@ PrintFormatCsvProperty& PrintFormatCsvProperty::enum_as_string(bool the_enum_as_
 /*
  * --- PrintFormatCsv ---------------------------------------------------------
  */
-
+struct PrintFormatCsvPropertyDefaultInitializer {
+    
+    PrintFormatCsvPropertyDefaultInitializer()
+    {
+        value.empty_member_value_representation(
+                PrintFormatCsv::EMPTY_MEMBER_VALUE_REPRESENTATION_DEFAULT());
+        value.enum_as_string(true);
+    }
+    PrintFormatCsvProperty value;
+};
 
 const PrintFormatCsvProperty& PrintFormatCsv::PROPERTY_DEFAULT()
 {
-    static PrintFormatCsvProperty property;
-    static bool init = false;
-
-    if (!init) {
-        property.empty_member_value_representation(
-                EMPTY_MEMBER_VALUE_REPRESENTATION_DEFAULT());
-        property.enum_as_string(true);
-        init = true;
-    }
-
-    return property;
+    static PrintFormatCsvPropertyDefaultInitializer property;
+    return property.value;
 }
 
 
 const std::string& PrintFormatCsv::COLUMN_SEPARATOR_DEFAULT()
 {
-    static std::string value = ",";
+    static const std::string value = ",";
     return value;
 }
 
 const std::string& PrintFormatCsv::EMPTY_MEMBER_VALUE_REPRESENTATION_DEFAULT()
 {
-    static std::string value = "nil";
+    static const std::string value = "nil";
     return value;
 }
 
@@ -394,13 +385,13 @@ PrintFormatCsv::PrintFormatCsv(
 {
 
     initialize_native();
-     // Add metadata column info    
+     // Add metadata column info
     build_column_info(column_info_, type_);
     std::ostringstream string_stream;
     output_file_ << "timestamp";
     print_type_header(string_stream, column_info_);
     output_file << std::endl;
-    
+
 }
 
 void PrintFormatCsv::initialize_native()
@@ -410,7 +401,7 @@ void PrintFormatCsv::initialize_native()
     format_wrapper_ .enable_top_level_type_printing = DDS_BOOLEAN_TRUE;
     format_wrapper_.enable_enum_as_string_printing = property_.enum_as_string()
             ?   DDS_BOOLEAN_TRUE
-            :   DDS_BOOLEAN_FALSE;    
+            :   DDS_BOOLEAN_FALSE;
 }
 
 const PrintFormatCsvProperty& PrintFormatCsv::property() const
@@ -517,13 +508,13 @@ void PrintFormatCsv::skip_cursor_columns(
         PrintFormatCsv::Cursor& cursor,
         RTIXMLSaveContext* save_context,
         const std::string& empty_member_value_rep)
-{   
+{
     // check for next sibling
     Cursor child_cursor = cursor->first_child();
     if (child_cursor == cursor->children().end()) {
         DDS_XMLHelper_save_freeform(
                 save_context,
-                "%s%s", 
+                "%s%s",
                 COLUMN_SEPARATOR_DEFAULT().c_str(),
                 empty_member_value_rep.c_str());
     }
@@ -563,13 +554,13 @@ void PrintFormatCsv::build_column_info(
     case TypeKind::UNION_TYPE:
     {
         const UnionType& union_type =
-                static_cast<const UnionType&> (member_type);               
+                static_cast<const UnionType&> (member_type);
         // Add discriminator column
         current_info.add_child(ColumnInfo(
                union_type.name() + ".disc",
                union_type.discriminator()));
-        
-        // recurse members 
+
+        // recurse members
         for (auto union_member : union_type.members()) {
             // complex member: branch tree
             ColumnInfo& child = current_info.add_child(ColumnInfo(
@@ -593,7 +584,7 @@ void PrintFormatCsv::build_column_info(
                     current_info,
                     struct_type.parent());
         }
-        
+
         // Recurse members
         for (auto struct_member : struct_type.members()) {
             // complex member: branch tree
@@ -610,7 +601,7 @@ void PrintFormatCsv::build_column_info(
     case TypeKind::ARRAY_TYPE:
     {
         const ArrayType& array_type =
-                static_cast<const ArrayType &>(member_type);        
+                static_cast<const ArrayType &>(member_type);
         std::vector<uint32_t> dimension_indexes;
         dimension_indexes.resize(array_type.dimension_count());
         uint32_t element_count = 0;
@@ -638,7 +629,7 @@ void PrintFormatCsv::build_column_info(
 
             ++element_count;
         }
-    }                
+    }
         break;
 
     case TypeKind::SEQUENCE_TYPE:
@@ -669,9 +660,9 @@ void PrintFormatCsv::build_column_info(
                 current_info,
                 alias_type.related_type());
     }
-        
+
         break;
-        
+
     default:
         // leaf reached
         break;
@@ -684,21 +675,21 @@ void PrintFormatCsv::print_type_header(
 {
     for (auto& child : current_info.children()) {
         std::ostringstream child_stream;
-        
+
         if (!current_info.has_parent()) {
             child_stream << ",";
         }
 
         child_stream << string_stream.str();
-        if (!child.is_collection()) {            
+        if (!child.is_collection()) {
             child_stream << "." ;
             child_stream << child.name();
         }
-      
-        PrintFormatCsv::print_type_header(child_stream, child);
+
+        print_type_header(child_stream, child);
     }
-    
-    if (current_info.children().size() == 0) {
+
+    if (current_info.children().empty()) {
         output_file() << string_stream.str();
     }
 }
@@ -714,15 +705,6 @@ PrintFormatCsv::ColumnInfo::ColumnInfo() :
 {
 }
 
-PrintFormatCsv::ColumnInfo::ColumnInfo(const ColumnInfo& other) :
-    parent_(other.parent_),
-    name_(other.name_),
-    type_kind_(other.type_kind_),
-    children_(other.children_)
-{
-}
-
-
 PrintFormatCsv::ColumnInfo::ColumnInfo(
         const std::string& name,
         const dds::core::xtypes::DynamicType& type) :
@@ -732,23 +714,20 @@ PrintFormatCsv::ColumnInfo::ColumnInfo(
 {
 }
 
-
 const PrintFormatCsv::ColumnInfo&
 PrintFormatCsv::ColumnInfo::parent() const
 {
     return *parent_;
 }
 
-
 PrintFormatCsv::ColumnInfo&
-PrintFormatCsv::ColumnInfo::add_child(const ColumnInfo& info)
+PrintFormatCsv::ColumnInfo::add_child(const ColumnInfo&& info)
 {
     children_.push_back(info);
     children_.back().parent_ = this;
-    
+
     return children_.back();
 }
-
 
 PrintFormatCsv::ColumnInfo::iterator
 PrintFormatCsv::ColumnInfo::first_child() const
@@ -756,13 +735,13 @@ PrintFormatCsv::ColumnInfo::first_child() const
     return children_.begin();
 }
 
-const TypeKind& PrintFormatCsv::ColumnInfo::type_kind() const
+const TypeKind PrintFormatCsv::ColumnInfo::type_kind() const
 {
     return type_kind_;
 }
 
 PrintFormatCsv::ColumnInfo& PrintFormatCsv::ColumnInfo::type_kind(
-        const dds::core::xtypes::TypeKind& type_kind)
+        const dds::core::xtypes::TypeKind type_kind)
 {
     type_kind_ = type_kind;
 
@@ -788,8 +767,7 @@ bool PrintFormatCsv::ColumnInfo::has_parent() const
 
 bool PrintFormatCsv::ColumnInfo::is_collection() const
 {
-    return (type_kind() == TypeKind::ARRAY_TYPE
-                || type_kind() == TypeKind::SEQUENCE_TYPE);
+    return ((type_kind().underlying() & TypeKind::COLLECTION_TYPE) != 0);
 }
 
 
@@ -805,4 +783,3 @@ std::ostream& operator<<(
 }
 
 } } }
-

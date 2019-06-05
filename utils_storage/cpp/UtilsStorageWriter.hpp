@@ -136,7 +136,7 @@ public:
     typedef std::map<std::string, std::ofstream> OutputFileSet;
     typedef OutputFileSet::value_type FileSetEntry;
 
-    UtilsStorageWriter(const rti::routing::PropertySet& properties);
+    explicit UtilsStorageWriter(const rti::routing::PropertySet& properties);
     virtual ~UtilsStorageWriter();
 
     /**

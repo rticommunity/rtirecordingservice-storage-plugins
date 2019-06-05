@@ -31,9 +31,7 @@ namespace rti { namespace recorder { namespace utils {
  */
 class PrintFormatCsvProperty {
 public:
-    explicit PrintFormatCsvProperty();
-
-    PrintFormatCsvProperty(const PrintFormatCsvProperty& other);
+    PrintFormatCsvProperty();
 
     /**
      * @brief Specifies the value to be used as a data entry for a cell
@@ -104,19 +102,22 @@ class NativePrintFormatCsv;
  *
  * @see DDS_PrintFormat
  */
-class PrintFormatCsv
-{
+class PrintFormatCsv {
 public:
 
     /**
      * @brief Definition of the information associated with a data column.
      *
      */
-    class ColumnInfo;
     class ColumnInfo {
     public:
         typedef std::vector<ColumnInfo>::const_iterator iterator;
 
+        /**
+         * @brief Default constructor required to be used with C++ collections.
+         */
+        ColumnInfo();
+        
         /**
          * @brief Creates a ColumnInfo for a member
          *
@@ -128,19 +129,9 @@ public:
                 const dds::core::xtypes::DynamicType& type);
 
         /**
-         * @brief Copy constructor
+         * @brief Adds the specified info as child of this info.
          */
-        ColumnInfo(const ColumnInfo& other);
-
-        /**
-         * @brief Default constructor required to be used with C++ collections.
-         */
-        ColumnInfo();
-
-        /**
-         * @brief Adds the specified info as child of the this info.
-         */
-        ColumnInfo& add_child(const ColumnInfo& info);
+        ColumnInfo& add_child(const ColumnInfo&& info);
 
         /**
          * @brief Returns the parent of this info/
@@ -160,12 +151,12 @@ public:
         /**
          * @brief Returns he type kind of the member this info represents
          */
-        const dds::core::xtypes::TypeKind& type_kind() const;
+        const dds::core::xtypes::TypeKind type_kind() const;
 
         /**
          * @brief Sets the type kind of the member this info represents
          */
-        ColumnInfo& type_kind(const dds::core::xtypes::TypeKind& type_kind);
+        ColumnInfo& type_kind(const dds::core::xtypes::TypeKind type_kind);
 
         /**
          * @brief Returns the name of the member this info represents
@@ -205,14 +196,14 @@ public:
      * @brief Returns the default value of the column separator used in the
      * output CSV file.
      *
-     * Value: ,
+     * Value:  \p ","
      */
     static const std::string& COLUMN_SEPARATOR_DEFAULT();
 
     /**
      * @brief Returns the default value used to represent the empty member cell.
      *
-     * Value: nill
+     * Value:  \p "nil"
      */
     static const std::string& EMPTY_MEMBER_VALUE_REPRESENTATION_DEFAULT();
     

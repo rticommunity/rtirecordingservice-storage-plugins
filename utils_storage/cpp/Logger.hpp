@@ -15,21 +15,25 @@
 
 #include "rti/config/Logger.hpp"
 
+namespace rti { namespace recorder { namespace utils {
+
 std::ostream& operator<< (
         std::ostream& out,
         const rti::config::Verbosity& verbosity);
 
 class Logger {
 public:
+    Logger(const Logger&) = delete;
+    Logger& operator=(const Logger&) = delete;
+    
     static Logger& instance();
 
-    void verbosity(rti::config::Verbosity& verbosity);
+    void verbosity(rti::config::Verbosity verbosity);
 
     rti::config::Verbosity verbosity() const;
 
 private:
-    Logger();
-    Logger(const Logger&);
+    Logger();    
 
     rti::config::Verbosity _verbosity;
 };
@@ -40,6 +44,7 @@ private:
         std::cout << STREAM_EXP << std::endl; \
     }
 
+} } }
 
 #endif /* RTI_RECORDER_UTILS_LOGGER_HPP_ */
 

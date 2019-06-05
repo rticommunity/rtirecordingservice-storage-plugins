@@ -144,28 +144,28 @@ const dds::core::xtypes::DynamicType& dynamic_type(
         const rti::routing::StreamInfo& stream_info)
 {
     assert(stream_info.type_info().type_representation_kind()
-            == rti::routing::TypeRepresentationKind::DYNAMIC_TYPE);
+            rti::routing::TypeRepresentationKind::DYNAMIC_TYPE);
     return *(static_cast<dds::core::xtypes::DynamicType*>(
             stream_info.type_info().type_representation()));
 }
 
 const std::string& UtilsStorageWriter::PROPERTY_NAMESPACE()
 {
-    static std::string value = "rti.recording.utils_storage";
+    static const std::string value = "rti.recording.utils_storage";
     return value;
 }
 
 
 const std::string& UtilsStorageWriter::OUTPUT_DIR_PROPERTY_NAME()
 {
-    static std::string value = PROPERTY_NAMESPACE()
+    static const std::string value = PROPERTY_NAMESPACE()
             + ".output_dir_path";
     return value;
 }
 
 const std::string& UtilsStorageWriter::OUTPUT_FILE_BASENAME_PROPERTY_NAME()
 {
-    static std::string value = PROPERTY_NAMESPACE()
+    static const std::string value = PROPERTY_NAMESPACE()
         + ".output_file_basename";
     return value;
 }
@@ -173,35 +173,35 @@ const std::string& UtilsStorageWriter::OUTPUT_FILE_BASENAME_PROPERTY_NAME()
 
 const std::string& UtilsStorageWriter::OUTPUT_FORMAT_PROPERTY_NAME()
 {
-    static std::string value = PROPERTY_NAMESPACE()
+    static const std::string value = PROPERTY_NAMESPACE()
             + ".output_format";
     return value;
 }
 
 const std::string& UtilsStorageWriter::OUTPUT_MERGE_PROPERTY_NAME()
 {
-    static std::string value = PROPERTY_NAMESPACE()
+    static const std::string value = PROPERTY_NAMESPACE()
             + ".merge_output_files";
     return value;
 }
 
 const std::string& UtilsStorageWriter::LOGGING_VERBOSITY_PROPERTY_NAME()
 {
-    static std::string value = PROPERTY_NAMESPACE()
+    static const std::string value = PROPERTY_NAMESPACE()
             + ".verbosity";
     return value;
 }
 
 const std::string& UtilsStorageWriter::CSV_EMPTY_MEMBER_VALUE_REP_PROPERTY_NAME()
 {
-    static std::string value = PROPERTY_NAMESPACE()
+    static const std::string value = PROPERTY_NAMESPACE()
             + ".csv.empty_member_value";
     return value;
 }
 
 const std::string& UtilsStorageWriter::CSV_ENUM_AS_STRING_PROPERTY_NAME()
 {
-    static std::string value = PROPERTY_NAMESPACE()
+    static const std::string value = PROPERTY_NAMESPACE()
             + ".csv.enum_as_string";
     return value;
 }
@@ -209,30 +209,32 @@ const std::string& UtilsStorageWriter::CSV_ENUM_AS_STRING_PROPERTY_NAME()
 
 const std::string& UtilsStorageWriter::CSV_FILE_EXTENSION()
 {
-    static std::string value = ".csv";
+    static const std::string value = ".csv";
     return value;
 }
 
 const std::string& UtilsStorageWriter::OUTPUT_FILE_BASENAME_DEFAULT()
 {
-    static std::string value = "csv_converted";
+    static const std::string value = "csv_converted";
     return value;
 }
 
+struct UtilsStoragePropertDefaultInitializer {
+
+    UtilsStoragePropertDefaultInitializer()
+    {
+        value.merge_output_files(true);
+        value.output_dir_path(".");
+        value.output_file_basename(UtilsStorageWriter::OUTPUT_FILE_BASENAME_DEFAULT());
+        value.output_format_kind(OutputFormatKind::CSV_FORMAT);
+    }
+    UtilsStorageProperty value;
+};
+
 const UtilsStorageProperty& UtilsStorageWriter::PROPERTY_DEFAULT()
 {
-    static UtilsStorageProperty property;
-    static bool init = false;
-
-    if (!init) {
-        property.merge_output_files(true);
-        property.output_dir_path(".");
-        property.output_file_basename(OUTPUT_FILE_BASENAME_DEFAULT());
-        property.output_format_kind(OutputFormatKind::CSV_FORMAT);
-        init = true;
-    }
-
-    return property;
+    static UtilsStoragePropertDefaultInitializer property;
+    return property.value;
 }
 
 
