@@ -374,23 +374,13 @@ UtilsStorageWriter::UtilsStorageWriter(
 UtilsStorageWriter::~UtilsStorageWriter()
 {
     if (property_.merge_output_files()) {
-        try {
-            RTI_RECORDER_UTILS_LOG_MESSAGE(
-                    rti::config::Verbosity::STATUS_LOCAL,
-                    "UtilsStorageWriter: delete output files after merge");
-            for (auto it = output_files_.begin();
-                    it != output_files_.end();
-                    ++it) {
-                std::remove(it->first.c_str());
-            }
-        } catch (const std::exception& ex) {
-            RTI_RECORDER_UTILS_LOG_MESSAGE(
-                    rti::config::Verbosity::EXCEPTION,
-                    ex.what());
-        } catch (...) {
-            RTI_RECORDER_UTILS_LOG_MESSAGE(
-                    rti::config::Verbosity::EXCEPTION,
-                    "unexpected exception occurred while deleting output files");
+        RTI_RECORDER_UTILS_LOG_MESSAGE(
+                rti::config::Verbosity::STATUS_LOCAL,
+                "UtilsStorageWriter: delete output files after merge");
+        for (auto it = output_files_.begin();
+                it != output_files_.end();
+                ++it) {
+            std::remove(it->first.c_str());
         }
     }
 }
@@ -432,9 +422,9 @@ UtilsStorageWriter::create_stream_writer(
     case OutputFormatKind::CSV_FORMAT:
     {
         return new CsvStreamWriter(
-            csv_property_,
-            stream_info,
-            *(output_files_.rbegin()));
+                csv_property_,
+                stream_info,
+                *(output_files_.rbegin()));
     }
         break;
 
