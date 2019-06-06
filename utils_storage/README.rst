@@ -235,8 +235,11 @@ The resulting type header row and two data values row will look as follows:
 Plug-in Configuration
 ^^^^^^^^^^^^^^^^^^^^^
 
-The plug-in can be configured through the use of the the properties shown in
-table below:
+The plug-in can be configured through the use of name-vale pair properties that
+can be specified in the *RTI Recording Service* XML configuration file within
+the tag ``<output_storage>`` for the *converter* tool (``<converter>``).
+
+The set of available properties this plug-in supports is shown in table below:
 
 .. list-table:: Plug-in Configuration Properties
     :name: TablePlug-inProperties
