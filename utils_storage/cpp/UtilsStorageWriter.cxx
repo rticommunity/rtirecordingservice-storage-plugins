@@ -219,6 +219,16 @@ const std::string& UtilsStorageWriter::OUTPUT_FILE_BASENAME_DEFAULT()
     return value;
 }
 
+/*
+ * @brief Helper for the static initialization of the constant default
+ * values for a UtilsStorageProperty.
+ *
+ * Instead of declaring a constructor that takes all the parameters, this
+ * patterns allows to set each member individually through a setter within
+ * the constructor of this initializer class. Then an object of this class
+ * can be statically initialized and guarantee atomic construction as per the
+ * C++ conditions.
+ */
 struct UtilsStoragePropertDefaultInitializer {
 
     UtilsStoragePropertDefaultInitializer()
@@ -380,7 +390,11 @@ UtilsStorageWriter::~UtilsStorageWriter()
         for (auto it = output_files_.begin();
                 it != output_files_.end();
                 ++it) {
-            std::remove(it->first.c_str());
+            if (std::remove(it->first.c_str()) != 0) {
+                RTI_RECORDER_UTILS_LOG_MESSAGE(
+                        rti::config::Verbosity::EXCEPTION,
+                        "error deleting output file==" + it->first);
+            }
         }
     }
 }

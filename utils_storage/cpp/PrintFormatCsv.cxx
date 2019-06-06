@@ -343,6 +343,17 @@ PrintFormatCsvProperty& PrintFormatCsvProperty::enum_as_string(bool the_enum_as_
 /*
  * --- PrintFormatCsv ---------------------------------------------------------
  */
+
+/*
+ * @brief Helper for the static initialization of the constant default
+ * values for a PrintFormatCsvProperty. 
+ * 
+ * Instead of declaring a constructor that takes all the parameters, this
+ * patterns allows to set each member individually through a setter within
+ * the constructor of this initializer class. Then an object of this class
+ * can be statically initialized and guarantee atomic construction as per the
+ * C++ conditions.
+ */
 struct PrintFormatCsvPropertyDefaultInitializer {
     
     PrintFormatCsvPropertyDefaultInitializer()
@@ -723,7 +734,7 @@ PrintFormatCsv::ColumnInfo::parent() const
 PrintFormatCsv::ColumnInfo&
 PrintFormatCsv::ColumnInfo::add_child(const ColumnInfo&& info)
 {
-    children_.push_back(info);
+    children_.push_back(std::move(info));
     children_.back().parent_ = this;
 
     return children_.back();
