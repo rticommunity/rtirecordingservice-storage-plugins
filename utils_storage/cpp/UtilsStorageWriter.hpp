@@ -32,13 +32,9 @@ RTI_RECORDING_STORAGE_WRITER_CREATE_DECL(UtilsStorageWriter);
 /**
  * @brief Definition of the support output formats.
  */
-struct OutputFormatKind_def {
-    enum type {
-        CSV_FORMAT
-    };
+enum class OutputFormatKind {    
+        CSV_FORMAT    
 };
-
-typedef dds::core::safe_enum<OutputFormatKind_def> OutputFormatKind;
 
 /**
  * @brief Configuration elements of the Utils storage plug-in.
