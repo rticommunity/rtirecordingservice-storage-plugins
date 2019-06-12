@@ -111,7 +111,8 @@ public:
      */
     class ColumnInfo {
     public:
-        typedef std::vector<ColumnInfo>::const_iterator iterator;
+        typedef std::list<ColumnInfo> info_list;
+        typedef info_list::const_iterator iterator;
 
         /**
          * @brief Default constructor required to be used with C++ collections.
@@ -131,7 +132,7 @@ public:
         /**
          * @brief Adds the specified info as child of this info.
          */
-        ColumnInfo& add_child(const ColumnInfo&& info);
+        ColumnInfo& add_child(ColumnInfo&& info);
 
         /**
          * @brief Returns the parent of this info/
@@ -146,7 +147,7 @@ public:
         /**
          * @brief returns a reference to the list of children of this info
          */
-        const std::vector<ColumnInfo>& children() const;
+        const info_list& children() const;
 
         /**
          * @brief Returns he type kind of the member this info represents
@@ -185,12 +186,12 @@ public:
         const ColumnInfo *parent_;
         std::string name_;
         dds::core::xtypes::TypeKind type_kind_;
-        std::vector<ColumnInfo> children_;
+        info_list children_;
     };
     
 public:
     typedef ColumnInfo::iterator Cursor;
-    typedef std::vector<Cursor> CursorStack;
+    typedef std::list<Cursor> CursorStack;
 
     /**
      * @brief Returns the default value of the column separator used in the

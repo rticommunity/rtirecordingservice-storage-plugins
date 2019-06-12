@@ -732,7 +732,7 @@ PrintFormatCsv::ColumnInfo::parent() const
 }
 
 PrintFormatCsv::ColumnInfo&
-PrintFormatCsv::ColumnInfo::add_child(const ColumnInfo&& info)
+PrintFormatCsv::ColumnInfo::add_child(ColumnInfo&& info)
 {
     children_.push_back(std::move(info));
     children_.back().parent_ = this;
@@ -760,7 +760,7 @@ PrintFormatCsv::ColumnInfo& PrintFormatCsv::ColumnInfo::type_kind(
 }
 
 
-const std::vector<PrintFormatCsv::ColumnInfo>&
+const PrintFormatCsv::ColumnInfo::info_list&
 PrintFormatCsv::ColumnInfo::children() const
 {
     return children_;
