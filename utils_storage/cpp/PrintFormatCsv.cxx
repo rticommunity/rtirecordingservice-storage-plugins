@@ -477,8 +477,7 @@ void PrintFormatCsv::skip_cursor_siblings(
         RTIXMLSaveContext* save_context)
 {
     // Skip as many columns as remaining elements in array/union
-    PrintFormatCsv::CursorStack::const_reverse_iterator cursor_stack_it =
-            cursor_stack_.crbegin();
+    auto cursor_stack_it = cursor_stack_.crbegin();
     ++cursor_stack_it;
     PrintFormatCsv::Cursor parent_cursor = *cursor_stack_it;
     Cursor& cursor = this->cursor();
@@ -501,8 +500,7 @@ void PrintFormatCsv::skip_cursor_siblings(
 void PrintFormatCsv::skip_cursor(
         RTIXMLSaveContext* save_context)
 {
-    PrintFormatCsv::CursorStack::const_reverse_iterator cursor_stack_it =
-            cursor_stack_.crbegin();
+    auto cursor_stack_it = cursor_stack_.crbegin();
     ++cursor_stack_it;
     PrintFormatCsv::Cursor parent_cursor = *cursor_stack_it;
     Cursor& cursor = this->cursor();
@@ -571,18 +569,8 @@ void PrintFormatCsv::build_column_info(
                union_type.name() + ".disc",
                union_type.discriminator()));
 
-        // recurse members
-        for (uint32_t i = 0; i < union_type.member_count(); i++) {
-            auto& union_member = union_type.member(i);
-            // complex member: branch tree
-            ColumnInfo& child = current_info.add_child(ColumnInfo(
-                    union_member.name(),
-                    union_member.type()));
-            build_column_info(
-                    child,
-                    union_member.type());
-
-        }
+        // Recurse members
+        build_complex_member_column_info(current_info, union_type);
     }
         break;
 
@@ -599,17 +587,7 @@ void PrintFormatCsv::build_column_info(
         }
 
         // Recurse members
-        for (uint32_t i = 0; i < struct_type.member_count(); i++) {
-            auto& struct_member = struct_type.member(i);
-            // complex member: branch tree
-            ColumnInfo& child = current_info.add_child(ColumnInfo(
-                    struct_member.name(),
-                    struct_member.type()));
-            build_column_info(
-                    child,
-                    struct_member.type());
-
-        }
+        build_complex_member_column_info(current_info, struct_type);
     }
         break;
 
