@@ -332,7 +332,7 @@ UtilsStorageWriter::UtilsStorageWriter(
         // build output file name
         std::string output_file_name =
                 property_.output_dir_path()
-                + "/"
+                + RTI_RECORDER_UTILS_PATH_SEPARATOR
                 + property_.output_file_basename()
                 + CSV_FILE_EXTENSION();
         output_merged_file_.open(output_file_name);
@@ -390,10 +390,11 @@ UtilsStorageWriter::~UtilsStorageWriter()
         for (auto it = output_files_.begin();
                 it != output_files_.end();
                 ++it) {
+            it->second.close();
             if (std::remove(it->first.c_str()) != 0) {
                 RTI_RECORDER_UTILS_LOG_MESSAGE(
                         rti::config::Verbosity::EXCEPTION,
-                        "error deleting output file==" + it->first);
+                        "error deleting output file=" + it->first);
             }
         }
     }
@@ -406,7 +407,7 @@ UtilsStorageWriter::create_stream_writer(
 {
     std::string output_file_path =
             property_.output_dir_path()
-            + "/"
+            + RTI_RECORDER_UTILS_PATH_SEPARATOR
             + property_.output_file_basename()
             + "-"
             + stream_info.stream_name()

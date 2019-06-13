@@ -22,6 +22,11 @@
 
 namespace rti { namespace recorder { namespace utils {
 
+#ifdef RTI_WIN32
+    #define RTI_RECORDER_UTILS_PATH_SEPARATOR "\\"
+#else
+    #define RTI_RECORDER_UTILS_PATH_SEPARATOR "/"
+#endif
 
 /***
  * @brief Convenience macro to forward-declare the C-style function that will be
