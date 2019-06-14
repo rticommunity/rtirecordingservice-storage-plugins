@@ -664,6 +664,27 @@ void PrintFormatCsv::build_column_info(
     }
 }
 
+template<typename ComplexType>
+void PrintFormatCsv::build_complex_member_column_info(
+        ColumnInfo& current_info,
+        const ComplexType& member_type)
+{
+
+    // recurse members
+    for (uint32_t i = 0; i < member_type.member_count(); i++) {
+        auto& complex_member = member_type.member(i);
+        // complex member: branch tree
+        ColumnInfo& child = current_info.add_child(ColumnInfo(
+                complex_member.name(),
+                complex_member.type()));
+        build_column_info(
+                child,
+                complex_member.type());
+
+    }
+
+}
+
 void PrintFormatCsv::print_type_header(
         std::ostringstream& string_stream,
         const ColumnInfo& current_info)

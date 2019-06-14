@@ -324,24 +324,21 @@ private:
             ColumnInfo& current_info,
             const dds::core::xtypes::DynamicType& member_type);
 
+    /**
+     * @brief Recursively traverses the complex member to build the column info,
+     *
+     * This operation is templatized on the complex type kind, which can be
+     * either Struct or Union. This is required by the DynamicType API which
+     * are also templatized in this type.
+     *
+     * @param current_info Reference to the info associated with a complex member
+     * @param member_type Type of the complex member represented by current_info.
+     * 
+     */
     template <typename ComplexType>
     void build_complex_member_column_info(
             ColumnInfo& current_info,
-            const ComplexType& member_type)
-    {
-        // recurse members
-        for (uint32_t i = 0; i < member_type.member_count(); i++) {
-            auto& complex_member = member_type.member(i);
-            // complex member: branch tree
-            ColumnInfo& child = current_info.add_child(ColumnInfo(
-                    complex_member.name(),
-                    complex_member.type()));
-            build_column_info(
-                    child,
-                    complex_member.type());
-
-        }
-    }
+            const ComplexType& member_type);
 
     /**
      *
