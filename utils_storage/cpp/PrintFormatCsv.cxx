@@ -571,19 +571,9 @@ void PrintFormatCsv::build_column_info(
                union_type.name() + ".disc",
                union_type.discriminator()));
 
-        // recurse members
-        for (uint32_t i = 0; i < union_type.member_count(); i++) {
-            auto& union_member = union_type.member(i);
-            // complex member: branch tree
-            ColumnInfo& child = current_info.add_child(ColumnInfo(
-                    union_member.name(),
-                    union_member.type()));
-            build_column_info(
-                    child,
-                    union_member.type());
-
+        // Recurse members
+        build_complex_member_column_info(current_info, union_type);
         }
-    }
         break;
 
     case TypeKind::STRUCTURE_TYPE:
@@ -599,18 +589,8 @@ void PrintFormatCsv::build_column_info(
         }
 
         // Recurse members
-        for (uint32_t i = 0; i < struct_type.member_count(); i++) {
-            auto& struct_member = struct_type.member(i);
-            // complex member: branch tree
-            ColumnInfo& child = current_info.add_child(ColumnInfo(
-                    struct_member.name(),
-                    struct_member.type()));
-            build_column_info(
-                    child,
-                    struct_member.type());
-
+        build_complex_member_column_info(current_info, struct_type);
         }
-    }
         break;
 
     case TypeKind::ARRAY_TYPE:
@@ -687,7 +667,7 @@ void PrintFormatCsv::build_column_info(
 void PrintFormatCsv::print_type_header(
         std::ostringstream& string_stream,
         const ColumnInfo& current_info)
-{
+{    
     for (auto& child : current_info.children()) {
         std::ostringstream child_stream;
 
@@ -782,7 +762,8 @@ bool PrintFormatCsv::ColumnInfo::has_parent() const
 
 bool PrintFormatCsv::ColumnInfo::is_collection() const
 {
-    return ((type_kind().underlying() & TypeKind::COLLECTION_TYPE) != 0);
+    return type_kind().underlying() == TypeKind::SEQUENCE_TYPE
+            || type_kind().underlying() == TypeKind::ARRAY_TYPE;
 }
 
 

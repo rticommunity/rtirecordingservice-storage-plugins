@@ -10,6 +10,7 @@
  * use or inability to use the software.
  */
 
+#include <rti/util/StreamFlagSaver.hpp>
 #include "UtilsStorageWriter.hpp"
 #include "PrintFormatCsv.hpp"
 #include "Logger.hpp"
@@ -82,6 +83,8 @@ std::ostream& operator<<(
         std::ostream& os,
         const UtilsStorageProperty& property)
 {
+    rti::util::StreamFlagSaver stream_flag_saver(os);
+    
     size_t namespace_length =
             UtilsStorageWriter::PROPERTY_NAMESPACE().length() + 1;
     os << "\t"
@@ -394,7 +397,8 @@ UtilsStorageWriter::~UtilsStorageWriter()
             if (std::remove(it->first.c_str()) != 0) {
                 RTI_RECORDER_UTILS_LOG_MESSAGE(
                         rti::config::Verbosity::EXCEPTION,
-                        "error deleting output file=" + it->first);
+                        "error deleting output file=" + it->first+
+                        + " with error code=" + std::to_string(errno));
             }
         }
     }
@@ -538,9 +542,8 @@ void CsvStreamWriter::store(
                 (int64_t) sample_info->reception_timestamp().sec()
                 * NANOSECS_PER_SEC;
         timestamp += sample_info->reception_timestamp().nanosec();
-
-        output_file_entry_.second << timestamp;
-        // now print sample data
+        
+        // print sample data
         if (sample_info->valid()) {
             DDS_UnsignedLong data_as_csv_length = 0;
             
@@ -562,6 +565,10 @@ void CsvStreamWriter::store(
             rti::core::check_return_code(
                     native_retcode,
                     "failed convert to DynamicData to CSV");
+
+            // add timestamp metadata (first column)
+            output_file_entry_.second << timestamp;
+            
             // add formatted sample content to file
             output_file_entry_.second << data_as_csv_;
             // end of row
