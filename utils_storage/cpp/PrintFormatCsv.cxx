@@ -477,7 +477,8 @@ void PrintFormatCsv::skip_cursor_siblings(
         RTIXMLSaveContext* save_context)
 {
     // Skip as many columns as remaining elements in array/union
-    auto cursor_stack_it = cursor_stack_.crbegin();
+    PrintFormatCsv::CursorStack::const_reverse_iterator cursor_stack_it =
+            cursor_stack_.crbegin();
     ++cursor_stack_it;
     PrintFormatCsv::Cursor parent_cursor = *cursor_stack_it;
     Cursor& cursor = this->cursor();
@@ -500,7 +501,8 @@ void PrintFormatCsv::skip_cursor_siblings(
 void PrintFormatCsv::skip_cursor(
         RTIXMLSaveContext* save_context)
 {
-    auto cursor_stack_it = cursor_stack_.crbegin();
+    PrintFormatCsv::CursorStack::const_reverse_iterator cursor_stack_it =
+            cursor_stack_.crbegin();
     ++cursor_stack_it;
     PrintFormatCsv::Cursor parent_cursor = *cursor_stack_it;
     Cursor& cursor = this->cursor();
@@ -571,7 +573,7 @@ void PrintFormatCsv::build_column_info(
 
         // Recurse members
         build_complex_member_column_info(current_info, union_type);
-    }
+        }
         break;
 
     case TypeKind::STRUCTURE_TYPE:
@@ -588,7 +590,7 @@ void PrintFormatCsv::build_column_info(
 
         // Recurse members
         build_complex_member_column_info(current_info, struct_type);
-    }
+        }
         break;
 
     case TypeKind::ARRAY_TYPE:
@@ -665,7 +667,7 @@ void PrintFormatCsv::build_column_info(
 void PrintFormatCsv::print_type_header(
         std::ostringstream& string_stream,
         const ColumnInfo& current_info)
-{
+{    
     for (auto& child : current_info.children()) {
         std::ostringstream child_stream;
 
@@ -760,7 +762,8 @@ bool PrintFormatCsv::ColumnInfo::has_parent() const
 
 bool PrintFormatCsv::ColumnInfo::is_collection() const
 {
-    return ((type_kind().underlying() & TypeKind::COLLECTION_TYPE) != 0);
+    return type_kind().underlying() == TypeKind::SEQUENCE_TYPE
+            || type_kind().underlying() == TypeKind::ARRAY_TYPE;
 }
 
 
