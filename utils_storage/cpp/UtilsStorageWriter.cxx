@@ -393,7 +393,6 @@ UtilsStorageWriter::~UtilsStorageWriter()
         for (auto it = output_files_.begin();
                 it != output_files_.end();
                 ++it) {
-            it->second.close();
             if (std::remove(it->first.c_str()) != 0) {
                 RTI_RECORDER_UTILS_LOG_MESSAGE(
                         rti::config::Verbosity::EXCEPTION,
@@ -443,7 +442,7 @@ UtilsStorageWriter::create_stream_writer(
         return new CsvStreamWriter(
                 csv_property_,
                 stream_info,
-                *(output_files_.rbegin()));
+                *(output_files_.find(output_file_path)));
     }
         break;
 
@@ -456,28 +455,34 @@ UtilsStorageWriter::create_stream_writer(
 void UtilsStorageWriter::delete_stream_writer(
         rti::recording::storage::StorageStreamWriter *writer)
 {
-    CsvStreamWriter *stream_writer = static_cast<CsvStreamWriter*>(writer);
-    if (property_.merge_output_files()) {
-        try {
-            RTI_RECORDER_UTILS_LOG_MESSAGE(
+    CsvStreamWriter *stream_writer = static_cast<CsvStreamWriter*> (writer);
+    RTI_RECORDER_UTILS_LOG_MESSAGE(
+            rti::config::Verbosity::STATUS_LOCAL,
+            ("UtilsStorageWriter: delete StreamWriter for file="
+                    + stream_writer->file_entry().first).c_str());
+    try {       
+        stream_writer->file_entry().second.flush();
+        if (property_.merge_output_files()) {
+             RTI_RECORDER_UTILS_LOG_MESSAGE(
                     rti::config::Verbosity::STATUS_LOCAL,
-                    ("UtilsStorageWriter: merge file=" + stream_writer->file_entry().first).c_str());
-            stream_writer->file_entry().second.flush();
+                    ("UtilsStorageWriter: merge file="
+                            + stream_writer->file_entry().first).c_str());
             merge_output_file(stream_writer->file_entry());
-        } catch (const std::exception& ex) {
-            RTI_RECORDER_UTILS_LOG_MESSAGE(
-                    rti::config::Verbosity::EXCEPTION,
-                    ex.what());
-        } catch (...) {
-            std::string message =
-                    "unexpected exception occurred while merging file with name="
-                    + stream_writer->file_entry().first;
-            RTI_RECORDER_UTILS_LOG_MESSAGE(
-                    rti::config::Verbosity::EXCEPTION,
-                    message);
         }
+        stream_writer->file_entry().second.close();
+    } catch (const std::exception& ex) {
+        RTI_RECORDER_UTILS_LOG_MESSAGE(
+                rti::config::Verbosity::EXCEPTION,
+                ex.what());
+    } catch (...) {
+        std::string message =
+                "unexpected exception occurred while merging file with name="
+                + stream_writer->file_entry().first;
+        RTI_RECORDER_UTILS_LOG_MESSAGE(
+                rti::config::Verbosity::EXCEPTION,
+                message);
     }
-    
+
     delete writer;
 }
 
