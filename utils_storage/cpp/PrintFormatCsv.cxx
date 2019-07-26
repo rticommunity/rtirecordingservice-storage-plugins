@@ -119,16 +119,25 @@ public:
         PrintFormatCsv& print_format = PrintFormatCsv::from_native(self);
         RTI_PRINT_FORMAT_CSV_LOG_CURSOR(print_format);
         print_format.skip_cursor(name, save_context);
+
+        // sequence members require printing the length first, which
+        // needs to be computed
+        PrintFormatCsv::Cursor& array_cursor = print_format.cursor();
         print_format.push_cursor();
+        if (array_cursor->type_kind() == TypeKind::SEQUENCE_TYPE) {
+            print_format.enter_sequence_context(name, save_context);
+            ++print_format.cursor();
+        }
     }
 
     static void print_array_ending(
             struct DDS_PrintFormat *self,
             struct RTIXMLSaveContext *save_context,
-            const char *,
+            const char *name,
             int)
     {
         PrintFormatCsv& print_format = PrintFormatCsv::from_native(self);
+        print_format.leave_sequence_context(name);
         // Skip as many columns as remaining elements in array
         print_format.skip_cursor_siblings(save_context);
         print_format.pop_cursor();
@@ -346,8 +355,8 @@ PrintFormatCsvProperty& PrintFormatCsvProperty::enum_as_string(bool the_enum_as_
 
 /*
  * @brief Helper for the static initialization of the constant default
- * values for a PrintFormatCsvProperty. 
- * 
+ * values for a PrintFormatCsvProperty.
+ *
  * Instead of declaring a constructor that takes all the parameters, this
  * patterns allows to set each member individually through a setter within
  * the constructor of this initializer class. Then an object of this class
@@ -355,7 +364,7 @@ PrintFormatCsvProperty& PrintFormatCsvProperty::enum_as_string(bool the_enum_as_
  * C++ conditions.
  */
 struct PrintFormatCsvPropertyDefaultInitializer {
-    
+
     PrintFormatCsvPropertyDefaultInitializer()
     {
         value.empty_member_value_representation(
@@ -383,6 +392,13 @@ const std::string& PrintFormatCsv::EMPTY_MEMBER_VALUE_REPRESENTATION_DEFAULT()
     static const std::string value = "nil";
     return value;
 }
+
+const std::string& PrintFormatCsv::SEQ_LENGTH_TOKEN()
+{
+    static const std::string value = "###############";
+    return value;
+}
+
 
 PrintFormatCsv::PrintFormatCsv(
         const PrintFormatCsvProperty& property,
@@ -437,6 +453,7 @@ void PrintFormatCsv::start_data_conversion()
 {
     cursor_stack_.clear();
     cursor_stack_.push_back(column_info_.first_child());
+    seq_context_stack_.clear();
 }
 
 std::ofstream& PrintFormatCsv::output_file()
@@ -631,6 +648,15 @@ void PrintFormatCsv::build_column_info(
     {
         const SequenceType& sequence_type =
                 static_cast<const SequenceType &> (member_type);
+
+        /* length column*/
+        std::ostringstream length_item;
+        length_item << current_info.name() << ".length";
+        current_info.add_child(ColumnInfo(
+                length_item.str(),
+                rti::core::xtypes::PrimitiveType<int32_t>()));
+
+        /* item columns */
         for (uint32_t i = 0; i < sequence_type.bounds(); i++) {
             std::ostringstream element_item;
             element_item << current_info.name() << "[" << i << "]";
@@ -688,7 +714,7 @@ void PrintFormatCsv::build_complex_member_column_info(
 void PrintFormatCsv::print_type_header(
         std::ostringstream& string_stream,
         const ColumnInfo& current_info)
-{    
+{
     for (auto& child : current_info.children()) {
         std::ostringstream child_stream;
 
@@ -709,6 +735,68 @@ void PrintFormatCsv::print_type_header(
         output_file() << string_stream.str();
     }
 }
+
+void PrintFormatCsv::enter_sequence_context(
+        const std::string& name,
+        RTIXMLSaveContext* save_context)
+{
+    seq_context_stack_.push_back(SequenceContext(name));
+
+    if (save_context->sout != NULL) {
+        seq_context_stack_.back().length_ptr_ =
+                save_context->sout
+                + save_context->outputStringLength
+                + PrintFormatCsv::COLUMN_SEPARATOR_DEFAULT().length();
+    }
+    DDS_XMLHelper_save_freeform(
+            save_context,
+            "%s%s",
+            PrintFormatCsv::COLUMN_SEPARATOR_DEFAULT().c_str(),
+            SEQ_LENGTH_TOKEN().c_str());
+}
+
+void PrintFormatCsv::leave_sequence_context(const std::string& name)
+{
+    if (seq_context_stack_.empty()
+            || seq_context_stack_.back().name_ != name) {
+        return;
+    }
+    SequenceContext& context = seq_context_stack_.back();
+    if (context.length_ptr_ != NULL) {
+        /*
+         * compute sequence length: current cursor points to the last received
+         * item. The length is hence given by counting back to the beginning of
+         * the cursor, which points to item[0]
+         */
+        PrintFormatCsv::CursorStack::const_reverse_iterator cursor_stack_it =
+                cursor_stack_.crbegin();
+        ++cursor_stack_it;
+        PrintFormatCsv::Cursor parent_cursor = *cursor_stack_it;
+        int32_t length = 0;
+        Cursor cursor = parent_cursor->children().begin();
+        for (++cursor; cursor != this->cursor(); ++cursor) {
+            ++length;
+        }
+
+        std::ostringstream length_stream;
+        length_stream << length;
+        std::string length_as_str = length_stream.str();
+        int32_t padding_count =
+                SEQ_LENGTH_TOKEN().length()
+                - length_as_str.length();
+        for (int i = 0; i < padding_count; i++) {
+            context.length_ptr_[i] = ' ';
+        }
+        context.length_ptr_ += padding_count;
+        for (int i = 0; i < length_as_str.length(); i++) {
+            context.length_ptr_[i] = length_as_str.c_str()[i];
+        }
+
+    }
+
+    seq_context_stack_.pop_back();
+}
+
 
 
 /*
