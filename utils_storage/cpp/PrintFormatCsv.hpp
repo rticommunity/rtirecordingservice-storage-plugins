@@ -65,7 +65,7 @@ public:
 private:
     std::string empty_member_value_rep_;
     bool enum_as_string_;
-    
+
 };
 
 class NativePrintFormatCsv;
@@ -87,7 +87,7 @@ class NativePrintFormatCsv;
  * member being printed (notified by one of the DDS_PrintFormat callbacks) and
  * its associated ColumnInfo.
  *
- * This is needed specially for the situation where a bunch of member elements 
+ * This is needed specially for the situation where a bunch of member elements
  * are skipped because they are not present in a given DynamicData sample.
  * Since CSV requires consistent columns, even if a member is not present an
  * "empty" column with a separator needs to be placed. The Cursor allows to
@@ -118,7 +118,7 @@ public:
          * @brief Default constructor required to be used with C++ collections.
          */
         ColumnInfo();
-        
+
         /**
          * @brief Creates a ColumnInfo for a member
          *
@@ -169,7 +169,7 @@ public:
          */
         bool has_parent() const;
 
-        /**         
+        /**
          * @brief Returns whether the member this info represents is of a
          * collection type.
          */
@@ -181,17 +181,35 @@ public:
         friend std::ostream& operator<<(
                 std::ostream& os,
                 const ColumnInfo& info);
-        
+
     private:
         const ColumnInfo *parent_;
         std::string name_;
         dds::core::xtypes::TypeKind type_kind_;
         info_list children_;
     };
-    
+
+    /**
+     * @brief State needed for a sequence member.
+     */
+private:
+    class SequenceContext {
+    public:
+        SequenceContext(const std::string& name)
+            : name_(name), length_ptr_(NULL)
+        {
+        }
+
+    private:
+        friend class PrintFormatCsv;
+        std::string name_;
+        char* length_ptr_;
+    };
+
 public:
     typedef ColumnInfo::iterator Cursor;
     typedef std::list<Cursor> CursorStack;
+
 
     /**
      * @brief Returns the default value of the column separator used in the
@@ -207,7 +225,7 @@ public:
      * Value:  \p "nil"
      */
     static const std::string& EMPTY_MEMBER_VALUE_REPRESENTATION_DEFAULT();
-    
+
     /**
      * @brief Returns a PrintFormatCsvProperty reference with the default values
      * of this implementation.
@@ -216,7 +234,7 @@ public:
 
     /**
      * @brief Constructor
-     * 
+     *
      * @param[in] property Configuration elements
      * @param[in] type Type of the samples to be converted
      * @param[in] output_file Output file where the converted samples are written.
@@ -246,10 +264,11 @@ public:
      * @brief Returns the file stream handle to the output file where samples
      * are placed.
      */
-    std::ofstream& output_file();    
+    std::ofstream& output_file();
 
 private:
     friend class NativePrintFormatCsv;
+    static const std::string& SEQ_LENGTH_TOKEN();
 
     /**
      * @brief Resets the state of this object to start printing a new data
@@ -279,11 +298,11 @@ private:
      * @brief Pop the current top Cursor in the stack to the new top points
      * to the parent Cursor.
      */
-    void pop_cursor();    
+    void pop_cursor();
 
     /**
      * @brief Skips all the remaining siblings of the current Cursor (stack top)
-     * 
+     *
      * @see skip_cursor
      */
     void skip_cursor_siblings(RTIXMLSaveContext* save_context);
@@ -291,10 +310,10 @@ private:
     /**
      * @brief Skip the member pointed to by the current cursor (stack top) by
      * inserting an empty value representation and a separator.
-     *     
+     *
      * The value used for the skip member is given by
-     * PrintFormatCsvProperty::empty_member_value_representation.     
-     *    
+     * PrintFormatCsvProperty::empty_member_value_representation.
+     *
      * @param[in] save_context The output save context where the skip columns
      *                         are written.
      */
@@ -304,7 +323,7 @@ private:
      * @brief Skips the current cursor to point to the specified member.
      *
      * @see skip_cursor
-     * 
+     *
      * @param[in] member_name   Name of the member to position the cursor to.
      * @param[in] save_context The output save context where the skip columns
      *                         are written.
@@ -316,7 +335,7 @@ private:
     /**
      * @brief Generates the ColumnInfo tree for the type associated with
      * this object.
-     * 
+     *
      * @param current_info Reference to the info associated with a member
      * @param member_type Type of the member represented by current_info.
      */
@@ -333,7 +352,7 @@ private:
      *
      * @param current_info Reference to the info associated with a complex member
      * @param member_type Type of the complex member represented by current_info.
-     * 
+     *
      */
     template <typename ComplexType>
     void build_complex_member_column_info(
@@ -370,7 +389,30 @@ private:
             RTIXMLSaveContext* save_context,
             const std::string& empty_member_value_rep);
 
-    void initialize_native();    
+    /**
+     * @brief Adds a new SequenceContext to the member stack.
+     *
+     * @param[in] name    The sequence member name
+     * @param[in] save_context The output save context where the skip columns
+     *                         are written.
+     */
+    void enter_sequence_context(
+            const std::string& name,
+            RTIXMLSaveContext *save_context);
+
+    /**
+     * @brief Leaves the top element in the SequenceContext if that matches
+     * the specified sequence member name.
+     *
+     * If the name doesn't match the top of the stack, this operation is noop.
+     * Such situation means that the current member is not a sequence and not
+     * part of the current SequenceContext
+     *
+     * @param[in] name    The sequence member name
+     */
+    void leave_sequence_context(const std::string& name);
+
+    void initialize_native();
 
 private:
     PrintFormatWrapper<PrintFormatCsv> format_wrapper_;
@@ -379,6 +421,7 @@ private:
     std::ofstream& output_file_;
     ColumnInfo column_info_;
     CursorStack cursor_stack_;
+    std::list<SequenceContext> seq_context_stack_;
 };
 
 } } }

@@ -135,6 +135,43 @@ The resulting type header row will look as follows:
     ``Sequence`` type). If the recorded type has collections with big sizes,
     the generated file may hit the column limit of some |CSV| processor.
 
+Sequences
+"""""""""
+
+The mapping of a ``Sequence`` type is based on the mapping of a *Collection*
+type explained above with the particularity that includes an additional
+column to indicate the length of the sequence. That is:
+
+::
+
+    .<seq_member.length>.<seq_member[0]>...<seq_member[N-1>
+
+where the column ``<seq_member.length>`` indicates how many elements are set
+in the sequence (the number of columns with non-null values) and ``N`` is the
+maximum length of the sequence.
+
+Example
++++++++
+
+Consider the following type described in IDL:
+
+::
+
+    struct StructType {
+        sequence<long, 4> m_seq;
+    };
+
+The resulting type header row will look as follows:
+
+.. list-table::
+    :name: TableSeqTypeHeaderRow
+
+    * - .m_seq.length
+      - .m_seq[0]
+      - .m_seq[1]
+      - .m_seq[2]
+      - .m_seq[3]
+
 
 Unions
 """"""
@@ -198,7 +235,7 @@ Consider the following type described in IDL:
 ::
 
     struct StructType {
-        sequence<long>, 2 m_sequence;
+        sequence<long, 2> m_sequence;
         @optional String m_optional;
     };
 
@@ -221,13 +258,16 @@ The resulting type header row and two data values row will look as follows:
 .. list-table::
     :name: TableEmptyMembersExample
 
-    * - .m_sequence[0]
+    * - .m_sequence.length
+      - .m_sequence[0]
       - .m_sequence[1]
       - .m_optional
-    * - 1
+    * - 2
+      - 1
       - 2
       - hello
     * - 1
+      - 1
       - nil
       - nil
 
