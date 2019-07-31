@@ -10,8 +10,10 @@
  * use or inability to use the software.
  */
 
-#include "PrintFormatCsv.hpp"
+#undef RTI_dds_c_DLL_VARIABLE
+#define RTI_dds_c_DLL_VARIABLE __declspec( dllimport )
 
+#include "PrintFormatCsv.hpp"
 #include "dds_c/dds_c_xml.h"
 #include "dds/core/xtypes/StructType.hpp"
 #include "dds/core/xtypes/UnionType.hpp"
@@ -19,6 +21,7 @@
 #include "dds/core/xtypes/AliasType.hpp"
 
 #include "Logger.hpp"
+
 
 using namespace dds::core::xtypes;
 
