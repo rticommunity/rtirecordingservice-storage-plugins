@@ -17,7 +17,7 @@
 #include <iostream>
 #include <stack>
 
-#include "dds_c/dds_c_printformat.h"
+#include "ndds/ndds_c.h"
 #include "dds/core/xtypes/DynamicType.hpp"
 #include "dds/core/xtypes/MemberType.hpp"
 
