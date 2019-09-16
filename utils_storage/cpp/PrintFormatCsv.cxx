@@ -12,13 +12,13 @@
 
 #include "PrintFormatCsv.hpp"
 
-#include "dds_c/dds_c_xml.h"
 #include "dds/core/xtypes/StructType.hpp"
 #include "dds/core/xtypes/UnionType.hpp"
 #include "dds/core/xtypes/MemberType.hpp"
 #include "dds/core/xtypes/AliasType.hpp"
 
 #include "Logger.hpp"
+
 
 using namespace dds::core::xtypes;
 
