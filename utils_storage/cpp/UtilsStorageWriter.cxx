@@ -23,7 +23,7 @@
 
 namespace rti { namespace recorder { namespace utils {
 
-UtilsStorageProperty::UtilsStorageProperty() 
+UtilsStorageProperty::UtilsStorageProperty()
     : output_dir_path_("."),
       merge_output_files_(false),
       output_format_kind_(OutputFormatKind::CSV_FORMAT)
@@ -84,7 +84,7 @@ std::ostream& operator<<(
         const UtilsStorageProperty& property)
 {
     rti::util::StreamFlagSaver stream_flag_saver(os);
-    
+
     size_t namespace_length =
             UtilsStorageWriter::PROPERTY_NAMESPACE().length() + 1;
     os << "\t"
@@ -262,7 +262,7 @@ UtilsStorageWriter::UtilsStorageWriter(
     property_(PROPERTY_DEFAULT()),
     csv_property_(PrintFormatCsv::PROPERTY_DEFAULT())
 {
-    
+
     // verbosity
     rti::routing::PropertySet::const_iterator found =
             properties.find(LOGGING_VERBOSITY_PROPERTY_NAME());
@@ -295,8 +295,8 @@ UtilsStorageWriter::UtilsStorageWriter(
 
     // output directory
     found = properties.find(OUTPUT_DIR_PROPERTY_NAME());
-    if (found != properties.end()) {        
-        property_.output_dir_path(found->second);        
+    if (found != properties.end()) {
+        property_.output_dir_path(found->second);
     }
 
     // output file base name
@@ -351,7 +351,7 @@ UtilsStorageWriter::UtilsStorageWriter(
     if (found != properties.end()) {
         csv_property_.empty_member_value_representation(found->second);
     }
-    
+
     // print enumerations as strings
     found = properties.find(CSV_ENUM_AS_STRING_PROPERTY_NAME());
     if (found != properties.end()) {
@@ -370,18 +370,18 @@ UtilsStorageWriter::UtilsStorageWriter(
     }
 
     /* Log summary of configuration */
-    if (Logger::instance().verbosity().underlying() 
+    if (Logger::instance().verbosity().underlying()
             >= rti::config::Verbosity::STATUS_LOCAL) {
         std::ostringstream summary;
 
         summary << "Utils Storage plug-in configuration:" << "\n";
         summary << property_;
-        summary << csv_property_;       
-        
+        summary << csv_property_;
+
         RTI_RECORDER_UTILS_LOG_MESSAGE(
                     rti::config::Verbosity::STATUS_LOCAL,
-                    summary.str().c_str());        
-    }    
+                    summary.str().c_str());
+    }
 }
 
 UtilsStorageWriter::~UtilsStorageWriter()
@@ -408,13 +408,15 @@ UtilsStorageWriter::create_stream_writer(
         const rti::routing::StreamInfo& stream_info,
         const rti::routing::PropertySet&)
 {
-    std::string output_file_path =
+    std::ostringstream file_name_stream;
+    file_name_stream <<
             property_.output_dir_path()
-            + RTI_RECORDER_UTILS_PATH_SEPARATOR
-            + property_.output_file_basename()
-            + "-"
-            + stream_info.stream_name()
-            + CSV_FILE_EXTENSION();
+            << RTI_RECORDER_UTILS_PATH_SEPARATOR
+            << property_.output_file_basename()
+            << "-stream-"
+            << output_files_.size()
+            << CSV_FILE_EXTENSION();
+    std::string output_file_path = file_name_stream.str();
     std::ofstream output_file;
     output_file.open(output_file_path.c_str(), std::ios::out);
     if (!output_file.good()) {
@@ -449,7 +451,7 @@ UtilsStorageWriter::create_stream_writer(
     default:
         throw dds::core::UnsupportedError("unsupported output format kind");
     };
-    
+
 }
 
 void UtilsStorageWriter::delete_stream_writer(
@@ -460,7 +462,7 @@ void UtilsStorageWriter::delete_stream_writer(
             rti::config::Verbosity::STATUS_LOCAL,
             ("UtilsStorageWriter: delete StreamWriter for file="
                     + stream_writer->file_entry().first).c_str());
-    try {       
+    try {
         stream_writer->file_entry().second.flush();
         if (property_.merge_output_files()) {
              RTI_RECORDER_UTILS_LOG_MESSAGE(
@@ -515,7 +517,7 @@ CsvStreamWriter::CsvStreamWriter(
 
 CsvStreamWriter::~CsvStreamWriter()
 {
-    
+
 }
 
 /*
@@ -547,11 +549,11 @@ void CsvStreamWriter::store(
                 (int64_t) sample_info->reception_timestamp().sec()
                 * NANOSECS_PER_SEC;
         timestamp += sample_info->reception_timestamp().nanosec();
-        
+
         // print sample data
         if (sample_info->valid()) {
             DDS_UnsignedLong data_as_csv_length = 0;
-            
+
             // compute required size
             DDS_ReturnCode_t native_retcode = DDS_DynamicDataFormatter_to_string_w_format(
                     &sample_seq[i]->native(),
@@ -573,7 +575,7 @@ void CsvStreamWriter::store(
 
             // add timestamp metadata (first column)
             output_file_entry_.second << timestamp;
-            
+
             // add formatted sample content to file
             output_file_entry_.second << data_as_csv_;
             // end of row
@@ -587,5 +589,5 @@ UtilsStorageWriter::FileSetEntry& CsvStreamWriter::file_entry()
     return output_file_entry_;
 }
 
-} } } 
+} } }
 
