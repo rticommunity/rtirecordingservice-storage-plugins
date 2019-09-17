@@ -408,13 +408,15 @@ UtilsStorageWriter::create_stream_writer(
         const rti::routing::StreamInfo& stream_info,
         const rti::routing::PropertySet&)
 {
+    static uint64_t file_count = 0;
+
     std::ostringstream file_name_stream;
     file_name_stream <<
             property_.output_dir_path()
             << RTI_RECORDER_UTILS_PATH_SEPARATOR
             << property_.output_file_basename()
             << "-stream-"
-            << output_files_.size()
+            << file_count++
             << CSV_FILE_EXTENSION();
     std::string output_file_path = file_name_stream.str();
     std::ofstream output_file;

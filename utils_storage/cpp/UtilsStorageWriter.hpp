@@ -37,13 +37,13 @@ RTI_RECORDING_STORAGE_WRITER_CREATE_DECL(UtilsStorageWriter);
 /**
  * @brief Definition of the support output formats.
  */
-enum class OutputFormatKind {    
-        CSV_FORMAT    
+enum class OutputFormatKind {
+        CSV_FORMAT
 };
 
 /**
  * @brief Configuration elements of the Utils storage plug-in.
- * 
+ *
  */
 class UtilsStorageProperty {
 public:
@@ -56,11 +56,11 @@ public:
      * Default: CSV_FORMAT
      */
     UtilsStorageProperty& output_format_kind(const OutputFormatKind&);
-    
+
     /**
      * @brief Gets the OutputFormatKind
      */
-    OutputFormatKind output_format_kind() const;    
+    OutputFormatKind output_format_kind() const;
 
     /**
      * @brief Selects the directory where the output files are placed.
@@ -68,7 +68,7 @@ public:
      * Default: .
      */
     std::string output_dir_path() const;
-    
+
     /**
      * @brief Gets the output_dir_path
      */
@@ -80,7 +80,7 @@ public:
      * Default: [empty]
      */
     std::string output_file_basename() const;
-    
+
     /**
      * @brief Gets the output_file_basename
      */
@@ -93,7 +93,7 @@ public:
      * Default: true
      */
     bool merge_output_files() const;
-    
+
     /**
      * @brief Gets the merge_output_files
      */
@@ -125,7 +125,7 @@ std::ostream& operator<<(
  * DynamicData samples represented in a text-compatible format, such as CSV.
  *
  * In this implementation, each StreamWriter is responsible for converting
- * and storing the samples of the associated Stream/Topic into a dedicated 
+ * and storing the samples of the associated Stream/Topic into a dedicated
  * output text file, with attributes specified in UtilsStorageProperty.
  * All the output files the StreamWriters generate can be merged into a single
  * output file while deleting all the intermediate separate output files.
@@ -155,7 +155,7 @@ public:
     static const std::string& PROPERTY_NAMESPACE();
 
     /**
-     * @brief Returns the name of the property that configures 
+     * @brief Returns the name of the property that configures
      * UtilsStorageProperty::output_dir_path.
      *
      * Value: [namespace].output_dir_name
@@ -170,7 +170,7 @@ public:
      */
     static const std::string& OUTPUT_FILE_BASENAME_PROPERTY_NAME();
 
-    
+
     static const std::string& OUTPUT_FORMAT_PROPERTY_NAME();
 
     /**
@@ -240,7 +240,7 @@ public:
 
 private:
     void merge_output_file(FileSetEntry& file_entry);
-    
+
     UtilsStorageProperty property_;
     // Collection of output files, one for each stream
     OutputFileSet output_files_;
@@ -270,7 +270,7 @@ class UtilsStreamWriter :
         public rti::recording::storage::DynamicDataStorageStreamWriter {
 public:
 
-    virtual UtilsStorageWriter::FileSetEntry& file_entry() = 0;   
+    virtual UtilsStorageWriter::FileSetEntry& file_entry() = 0;
 };
 
 /**
@@ -295,13 +295,13 @@ public:
             const rti::routing::StreamInfo& stream_info,
             UtilsStorageWriter::FileSetEntry& output_file_entry);
 
-    
+
     virtual ~CsvStreamWriter() override;
 
     /**
      * @brief Writes the input samples into a CSV file. Each sample is placed
      * in a separate row.
-     * 
+     *
      * @override Implementation of DynamicDataStorageStreamWriter::store
      */
     void store(
@@ -311,7 +311,7 @@ public:
     /**
      * @brief Returns the file entry used by this UtilsStorageWriter to write
      * samples.
-     * 
+     *
      * @override UtilsStreamWriter::file_entry
      */
     UtilsStorageWriter::FileSetEntry& file_entry() override;
@@ -324,7 +324,7 @@ private:
     std::string data_as_csv_;
 };
 
-} } } 
+} } }
 
 #endif
 
