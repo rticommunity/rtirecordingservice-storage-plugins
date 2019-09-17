@@ -65,7 +65,8 @@ content and format of each file is a follows:
       - ...
       - Value for member2
 
-The name of the file is formed using the topic name and has ``.csv`` extension.
+The name of the file is formed using the suffix ``stream_`` followed by a number
+representing the file index (``0``, ``1 ``, etc) and has ``.csv`` extension.
 All the files are placed in a directory that can be specified in the
 plug-in configuration.
 
