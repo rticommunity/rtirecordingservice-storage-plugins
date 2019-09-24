@@ -65,10 +65,15 @@ content and format of each file is a follows:
       - ...
       - Value for member2
 
-The name of the file is formed using the suffix ``stream_`` followed by a number
-representing the file index (``0``, ``1 ``, etc) and has ``.csv`` extension.
+The name of the file is formed using the topic name and has ``.csv`` extension.
 All the files are placed in a directory that can be specified in the
 plug-in configuration.
+
+.. note::
+
+    If the topic name contains characters that cannot appear in the file name
+    because they are reserved by the underlying operating system, these characters
+    will be replaced by the token ``#``.
 
 Mapping of a data sample into columns
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

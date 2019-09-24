@@ -221,6 +221,14 @@ public:
      */
     static const std::string& OUTPUT_FILE_BASENAME_DEFAULT();
 
+
+    /**
+     * @brief Returns the character user to replace each reserved file name
+     * character that's present in the generation of the output file name.
+     */
+    static char FILE_NAME_REPLACEMENT_CHAR();
+
+
     /* --- StorateWriter implementation ------------------------------------ */
 
     /**
