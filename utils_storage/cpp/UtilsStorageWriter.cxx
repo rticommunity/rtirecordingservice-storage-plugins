@@ -10,6 +10,8 @@
  * use or inability to use the software.
  */
 
+#include <algorithm>
+
 #include <rti/util/StreamFlagSaver.hpp>
 #include "UtilsStorageWriter.hpp"
 #include "PrintFormatCsv.hpp"
@@ -152,6 +154,26 @@ const dds::core::xtypes::DynamicType& dynamic_type(
             stream_info.type_info().type_representation()));
 }
 
+const std::vector<char>& reserved_filename_chars()
+{
+    static std::vector<char> value;
+    static bool is_initialized = false;
+
+    if (!is_initialized) {
+        value.push_back('<');
+        value.push_back('>');
+        value.push_back(':');
+        value.push_back('\'');
+        value.push_back('/');
+        value.push_back('\\');
+        value.push_back('|');
+        value.push_back('?');
+        value.push_back('*');
+    }
+
+    return value;
+}
+
 const std::string& UtilsStorageWriter::PROPERTY_NAMESPACE()
 {
     static const std::string value = "rti.recording.utils_storage";
@@ -221,6 +243,15 @@ const std::string& UtilsStorageWriter::OUTPUT_FILE_BASENAME_DEFAULT()
     static const std::string value = "csv_converted";
     return value;
 }
+
+
+char UtilsStorageWriter::FILE_NAME_REPLACEMENT_CHAR()
+{
+    static char value = '#';
+
+    return value;
+}
+
 
 /*
  * @brief Helper for the static initialization of the constant default
@@ -408,17 +439,23 @@ UtilsStorageWriter::create_stream_writer(
         const rti::routing::StreamInfo& stream_info,
         const rti::routing::PropertySet&)
 {
-    static uint64_t file_count = 0;
-
-    std::ostringstream file_name_stream;
-    file_name_stream <<
+    std::string output_file_name =
+            property_.output_file_basename()
+            + "-"
+            + stream_info.stream_name();
+    // replace any invalid character
+    for (auto &reserved_char : reserved_filename_chars()) {
+        std::replace(
+                output_file_name.begin(),
+                output_file_name.end(),
+                reserved_char,
+                FILE_NAME_REPLACEMENT_CHAR());
+    }
+    std::string output_file_path =
             property_.output_dir_path()
-            << RTI_RECORDER_UTILS_PATH_SEPARATOR
-            << property_.output_file_basename()
-            << "-stream-"
-            << file_count++
-            << CSV_FILE_EXTENSION();
-    std::string output_file_path = file_name_stream.str();
+            + RTI_RECORDER_UTILS_PATH_SEPARATOR
+            + output_file_name
+            + CSV_FILE_EXTENSION();
     std::ofstream output_file;
     output_file.open(output_file_path.c_str(), std::ios::out);
     if (!output_file.good()) {
