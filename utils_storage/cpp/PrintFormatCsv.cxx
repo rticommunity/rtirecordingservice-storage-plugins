@@ -92,7 +92,7 @@ public:
         PrintFormatCsv& print_format = PrintFormatCsv::from_native(self);
         RTI_PRINT_FORMAT_CSV_LOG_CURSOR(print_format);
         print_format.skip_cursor(name, save_context);
-        DDS_XMLHelper_save_freeform(
+        RTIXMLSaveContext_freeform(
                 save_context,
                 "%s",
                 PrintFormatCsv::COLUMN_SEPARATOR_DEFAULT().c_str());
@@ -178,7 +178,7 @@ public:
     {
         PrintFormatCsv& print_format = PrintFormatCsv::from_native(self);
         RTI_PRINT_FORMAT_CSV_LOG_CURSOR(print_format);
-        DDS_XMLHelper_save_freeform(
+        RTIXMLSaveContext_freeform(
                 save_context,
                 "%s",
                 PrintFormatCsv::COLUMN_SEPARATOR_DEFAULT().c_str());
@@ -216,7 +216,7 @@ public:
             struct RTIXMLSaveContext *save_context,
             int)
     {
-        DDS_XMLHelper_save_freeform(
+        RTIXMLSaveContext_freeform(
                 save_context,
                 "%s",
                 PrintFormatCsv::COLUMN_SEPARATOR_DEFAULT().c_str());
@@ -540,7 +540,7 @@ void PrintFormatCsv::skip_cursor_columns(
     // check for next sibling
     Cursor child_cursor = cursor->first_child();
     if (child_cursor == cursor->children().end()) {
-        DDS_XMLHelper_save_freeform(
+        RTIXMLSaveContext_freeform(
                 save_context,
                 "%s%s",
                 COLUMN_SEPARATOR_DEFAULT().c_str(),
@@ -748,7 +748,7 @@ void PrintFormatCsv::enter_sequence_context(
                 + save_context->outputStringLength
                 + PrintFormatCsv::COLUMN_SEPARATOR_DEFAULT().length();
     }
-    DDS_XMLHelper_save_freeform(
+    RTIXMLSaveContext_freeform(
             save_context,
             "%s%s",
             PrintFormatCsv::COLUMN_SEPARATOR_DEFAULT().c_str(),
