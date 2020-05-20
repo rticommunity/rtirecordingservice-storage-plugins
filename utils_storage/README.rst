@@ -30,7 +30,7 @@ Requirements
 To use this plug-in you will need:
 
 - RTI Connext Professional version 6.0.0 or higher.
-- CMake version 3.5 or higher
+- CMake version 3.7 or higher
 - A target platform supported by *RTI* |RecS|.
 
 Capabilities and Usage
