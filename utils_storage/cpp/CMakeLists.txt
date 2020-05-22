@@ -9,8 +9,9 @@
 #  not be liable for any incidental or consequential damages arising out of the
 #  use or inability to use the software.
 #
-cmake_minimum_required(VERSION 3.5)
-project (ConverterUtils)
+cmake_minimum_required(VERSION 3.7)
+
+project(ConverterUtils)
 
 if(NOT BUILD_SHARED_LIBS)
     set(msg
@@ -39,7 +40,6 @@ find_package(
         routing_service
     )
 
-
 # Define the library that will provide the storage writer plugin
 add_library(
     utilsstorage
@@ -47,6 +47,9 @@ add_library(
     "${CMAKE_CURRENT_SOURCE_DIR}/PrintFormatCsv.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/UtilsStorageWriter.cxx"
 )
+
+# To ensure ABI compatibility with gcc > 5.1
+target_compile_definitions(utilsstorage PUBLIC $<$<CXX_COMPILER_ID:GNU>:_GLIBCXX_USE_CXX11_ABI=0>)
 
 target_link_libraries(
     utilsstorage
