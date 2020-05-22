@@ -11,7 +11,6 @@
  */
 
 #include <algorithm>
-#include <string.h>
 
 #include <rti/util/StreamFlagSaver.hpp>
 #include "UtilsStorageWriter.hpp"
@@ -592,29 +591,33 @@ void CsvStreamWriter::store(
 
         // print sample data
         if (sample_info->valid()) {
-            DDS_UnsignedLong data_as_csv_length = 0;
+            DDS_UnsignedLong data_as_csv_size = 0;
 
             // compute required size
             DDS_ReturnCode_t native_retcode = DDS_DynamicDataFormatter_to_string_w_format(
                     &sample_seq[i]->native(),
                     NULL,
-                    &data_as_csv_length,
+                    &data_as_csv_size,
                     print_format_csv_.native());
             rti::core::check_return_code(
                     native_retcode,
                     "failed to compute CSV data required length");
-            data_as_csv_.resize(data_as_csv_length);
+            data_as_csv_.resize(data_as_csv_size);
             native_retcode = DDS_DynamicDataFormatter_to_string_w_format(
                     &sample_seq[i]->native(),
                     &data_as_csv_[0],
-                    &data_as_csv_length,
+                    &data_as_csv_size,
                     print_format_csv_.native());
             rti::core::check_return_code(
                     native_retcode,
                     "failed convert to DynamicData to CSV");
 
-            // eliminating the trailing '\0' character needed by the C APIs
-            data_as_csv_.resize(strlen(data_as_csv_.c_str()));
+            /**
+             * Eliminating the trailing '\0' character needed by the C APIs. 
+             * Note that C++ internally keeps the null terminating character and 
+             * as such doesn't count it in the size() call.
+             */
+            data_as_csv_.resize(data_as_csv_size - 1);
 
             // add timestamp metadata (first column)
             output_file_entry_.second << timestamp;
