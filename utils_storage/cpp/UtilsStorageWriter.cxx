@@ -11,6 +11,7 @@
  */
 
 #include <algorithm>
+#include <string.h>
 
 #include <rti/util/StreamFlagSaver.hpp>
 #include "UtilsStorageWriter.hpp"
@@ -611,6 +612,9 @@ void CsvStreamWriter::store(
             rti::core::check_return_code(
                     native_retcode,
                     "failed convert to DynamicData to CSV");
+
+            // eliminating the trailing '\0' character needed by the C APIs
+            data_as_csv_.resize(strlen(data_as_csv_.c_str()));
 
             // add timestamp metadata (first column)
             output_file_entry_.second << timestamp;
