@@ -115,7 +115,7 @@ Execution
    ::
 
         <Connext directory>/bin/rticonverter \
-                -cfgFile ../ConverterToCSv.xml \
+                -cfgFile ../ConverterToCsv.xml \
                 -cfgName CdrToCsv
 
 
